@@ -18,7 +18,7 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: 1
+              count: 4  # ✅ Changed from 1 to 4
               capabilities: [gpu]
     command: >
       --model Qwen/Qwen3.5-35B-A3B-AWQ
@@ -30,6 +30,7 @@ services:
       --dtype auto
       --trust-remote-code
       --download-dir /models
-      --enable-reasoning
-      --reasoning-parser deepseek_r1
+      --tensor-parallel-size 4
+      --max-num-seqs 128
+      --enable-chunked-prefill
     restart: unless-stopped
