@@ -6,31 +6,24 @@ services:
     container_name: prescripta-llm
     runtime: nvidia
     environment:
-      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_VISIBLE_DEVICES=0,1,2,3
       - HF_TOKEN=${HF_TOKEN:-}
     volumes:
       - ./models:/models
       - ./config:/config
     ports:
       - "11007:11007"
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 4  # ✅ Changed from 1 to 4
-              capabilities: [gpu]
+    ipc: host
     command: >
-      --model Qwen/Qwen3.5-35B-A3B-AWQ
+      --model Qwen/Qwen3.5-35B-A3B
       --served-model-name prescripta-judge
       --host 0.0.0.0
       --port 11007
-      --max-model-len 16384
-      --gpu-memory-utilization 0.92
-      --dtype auto
-      --trust-remote-code
-      --download-dir /models
+      --max-model-len 32768
+      --gpu-memory-utilization 0.90
       --tensor-parallel-size 4
       --max-num-seqs 128
       --enable-chunked-prefill
+      --download-dir /models
+      --trust-remote-code
     restart: unless-stopped
