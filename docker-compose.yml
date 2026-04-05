@@ -1,19 +1,7 @@
-version: "3.8"
-
 services:
   vllm:
-    build: .
+    image: vllm/vllm-openai:latest
     container_name: prescripta-llm
-    runtime: nvidia
-    environment:
-      - NVIDIA_VISIBLE_DEVICES=0,1,2,3
-      - HF_TOKEN=${HF_TOKEN:-}
-    volumes:
-      - ./models:/models
-      - ./config:/config
-    ports:
-      - "11007:11007"
-    ipc: host
     command: >
       --model Qwen/Qwen3.5-35B-A3B
       --served-model-name prescripta-judge
@@ -26,4 +14,21 @@ services:
       --enable-chunked-prefill
       --download-dir /models
       --trust-remote-code
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=0,1,2,3
+      - HF_TOKEN=${HF_TOKEN:-}
+    volumes:
+      - ./models:/models
+    ports:
+      - "11007:11007"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 4
+              capabilities: [gpu]
+    ipc: host
     restart: unless-stopped
+volumes:
+  models:
